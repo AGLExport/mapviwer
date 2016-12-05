@@ -108,6 +108,8 @@ void MP_DRAW_SetVeiwInfo(INT32 maps)
 		SC_LOG_ErrorPrint(SC_TAG_MP, (Char*)"SC_MNG_GetDispMode, ret=%d, " HERE, ret);
 	}
 
+	g_vi.disp_mode = 0;
+
 	// 地図中心の地理座標を取得
 	ret = SC_MNG_GetMapCursorCoord(maps, &g_vi.geo_coord);
 	if(e_SC_RESULT_SUCCESS != ret) {

@@ -2,9 +2,9 @@ AUTOMAKE_OPTIONS = foreign
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
-lib_LTLIBRARIES = libnavicore.la
+lib_LTLIBRARIES = libmapcore.la
 
-libnavicore_la_SOURCES = \
+libmapcore_la_SOURCES = \
 sms/lib/smsutil/src/smsutil.c \
 sms/lib/smsutil/src/polygon.cpp \
 sms/sms-core/SMUtil/pthread_msq.c \
@@ -521,10 +521,8 @@ sms/sms-core/SMCComCMN/SMCComMem.h \
 sms/sms-core/SMCComCMN/SMCComMd5.h
 
 
-#libnavicore_la_CFLAGS=-fPIC
-#libnavicore_la_CXXFLAGS=-fPIC
-libnavicore_la_LDFLAGS= -shared -fPIC -version-info 0:1:0
-libnavicore_la_CPPFLAGS = -fPIC \
+libmapcore_la_LDFLAGS= -shared -fPIC -version-info 0:1:0
+libmapcore_la_CPPFLAGS = -fPIC \
         -I$(top_srcdir)/src/sms \
         -I$(top_srcdir)/src/sms/lib/include \
         -I$(top_srcdir)/src/sms/locator/include \
@@ -532,7 +530,7 @@ libnavicore_la_CPPFLAGS = -fPIC \
         -I$(top_srcdir)/src/sms/sms-core/include \
         -I$(top_srcdir)/src/sms/sms-core/SMUtil
 
-libnavicore_la_CFLAGS = -fPIC \
+libmapcore_la_CFLAGS = -fPIC \
         @GLIB_CFLAGS@ \
         @FREETYPE2_CFLAGS@ \
         @WAYLAND_CFLAGS@ \
@@ -542,7 +540,7 @@ libnavicore_la_CFLAGS = -fPIC \
         @EXPAT_CFLAGS@ \
         @OPENSSL_CFLAGS@
 
-libnavicore_la_CXXFLAGS = -fPIC \
+libmapcore_la_CXXFLAGS = -fPIC \
         @GLIB_CFLAGS@ \
         @FREETYPE2_CFLAGS@ \
         @WAYLAND_CFLAGS@ \
@@ -552,15 +550,15 @@ libnavicore_la_CXXFLAGS = -fPIC \
         @EXPAT_CFLAGS@ \
         @OPENSSL_CFLAGS@
 
-libnavicore_la_LIBADD = \
+libmapcore_la_LIBADD = \
         @OPENSSL_LIBS@ \
         @GL_LIBS@ \
         @ZLIB_LIBS@ \
         @SQLITE3_LIBS@ \
         @EXPAT_LIBS@
 
-bin_PROGRAMS        = navi
-navi_SOURCES = \
+bin_PROGRAMS        = mapview
+mapview_SOURCES = \
 sms/sms-core/include/navicore.h \
 sms/sms-core/include/navicoredefex.h \
 sms/sms-core/include/navicoredef.h \
@@ -570,6 +568,7 @@ sms/sms-core/SMCoreMP/MP_GL.h \
 sms/sms-core/SMUtil/pthread_msq.h \
 glview/glview.c \
 glview/glview_wayland.c \
+glview/ivi-application-protocol.c \
 yspng/yspng.cpp \
 pthread/pthread_timer.c \
 main/navi.c \
@@ -582,6 +581,7 @@ main/font.cpp \
 main/image.c \
 glview/glview_local.h \
 glview/glview.h \
+glview/ivi-application-client-protocol.h \
 yspng/yspng.h \
 pthread/pthread_timer.h \
 main/png.h \
@@ -592,7 +592,8 @@ main/image.h \
 LICENSE \
 COPYING
 
-navi_CPPFLAGS = \
+mapview_CPPFLAGS = \
+        -D_BSD_SOURCE \
         -I$(top_srcdir)/src/sms \
         -I$(top_srcdir)/src/sms/lib/include \
         -I$(top_srcdir)/src/sms/locator/include \
@@ -603,7 +604,7 @@ navi_CPPFLAGS = \
         -I$(top_srcdir)/src/yspng \
         -I$(top_srcdir)/src/pthread
 
-navi_CFLAGS = \
+mapview_CFLAGS = \
         @GLIB_CFLAGS@ \
         @FREETYPE2_CFLAGS@ \
         @WAYLAND_CFLAGS@ \
@@ -613,7 +614,7 @@ navi_CFLAGS = \
         @EXPAT_CFLAGS@ \
         @OPENSSL_CFLAGS@
 
-navi_CXXFLAGS = \
+mapview_CXXFLAGS = \
         @GLIB_CFLAGS@ \
         @FREETYPE2_CFLAGS@ \
         @WAYLAND_CFLAGS@ \
@@ -623,8 +624,9 @@ navi_CXXFLAGS = \
         @EXPAT_CFLAGS@ \
         @OPENSSL_CFLAGS@
 
-navi_LDADD = \
-	libnavicore.la \
+mapview_LDADD = \
+	-lrt \
+	libmapcore.la \
         @GLIB_LIBS@ \
         @FREETYPE2_LIBS@ \
         @WAYLAND_LIBS@ \
@@ -635,17 +637,6 @@ navi_LDADD = \
         @OPENSSL_LIBS@
 
 #
-
-naviincludedir = $(includedir)/NC
-naviinclude_HEADERS =	\
-sms/sms-core/include/navicore.h \
-sms/sms-core/include/navicoredefex.h \
-sms/sms-core/include/navicoredef.h \
-sms/sms-core/SMCoreMP/es1emu/MP_Es1Emulation.h \
-sms/sms-core/SMCoreMP/MP_Def.h \
-sms/sms-core/SMCoreMP/MP_GL.h \
-sms/sms-core/SMUtil/pthread_msq.h
-
 
 
 

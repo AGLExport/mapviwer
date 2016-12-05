@@ -21,9 +21,16 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "glview.h"
 #include "glview_local.h"
+
+#include "navicore.h"
 
 #define GLV_ON_RESHAPE	(1)
 #define GLV_ON_REDRAW	(2)
@@ -359,6 +366,91 @@ void *glvSurfaceViewProc(void *param)
    return(NULL);
 }
 
+
+void *g_GeocordSHM = NULL;
+
+int Create_GeocordSHM(void)
+{
+	int fd = 0;
+	int i=0;
+	struct stat sstat;
+
+	memset(&sstat,0,sizeof(sstat));
+	
+	for(i=0;i < 100;i++)
+	{
+		usleep(100*1000);
+		
+		fprintf(stdout,"VAPVIEW:shm open\n");
+		
+		fd = shm_open("/shm_navigation_geocord", O_RDWR, 0);
+		if ( fd == -1) continue;
+		
+		fstat(fd, &sstat);
+		g_GeocordSHM = mmap(NULL,sstat.st_size,PROT_WRITE,MAP_SHARED,fd,0);
+
+		close(fd);
+		
+		if (g_GeocordSHM == NULL) continue;
+		
+		break;
+	}
+	
+	return 0;
+}
+
+void *glvMapUpdateProc(void *param)
+{
+	GLVCONTEXT_t *glv_context;
+	SMGEOCOORD geo,geo2;
+	SMCARSTATE car;
+
+	glv_context = (GLVCONTEXT_t*)param;
+
+	fprintf(stdout,"VAPVIEW:mapview proc start\n");
+	
+	while(1)
+	{
+		usleep(600*1000);
+		
+		if (g_GeocordSHM != NULL)
+		{
+			extern int SC_MNG_SetMapCursorCoord(INT32 maps, const SMGEOCOORD *geoCoord);
+			extern int SC_MNG_GetMapCursorCoord(INT32 maps, SMGEOCOORD *geoCoord);
+			extern void MP_DRAW_SetVeiwInfo(INT32 maps);
+			
+			
+			NC_DM_GetCarState(&car, e_SC_CARLOCATION_NOW);
+
+//			memcpy(&car.coord,g_GeocordSHM,sizeof(SMGEOCOORD));
+			memcpy(&car,g_GeocordSHM,sizeof(SMCARSTATE));
+
+			NC_DM_SetCarState(&car, e_SC_CARLOCATION_NOW);
+			
+			/*
+			memcpy(&geo,g_GeocordSHM,sizeof(SMGEOCOORD));
+			
+			SC_MNG_SetMapCursorCoord(NC_MP_MAP_MAIN, &geo);
+			
+			memset(&geo2,0,sizeof(SMGEOCOORD));
+			SC_MNG_GetMapCursorCoord(NC_MP_MAP_MAIN, &geo2);
+			*/
+			//fprintf(stdout,"GEO: %d,%d\n",car.coord.longitude, car.coord.latitude);
+			
+			MP_DRAW_SetVeiwInfo(NC_MP_MAP_MAIN);
+			
+			glvOnReDraw(glv_context);
+			//glvOnUpdate(glv_context);
+		}
+		else
+		{
+			Create_GeocordSHM();
+		}
+	}
+	
+   return(NULL);
+}
+
 GLVContext glvCreateSurfaceView(GLVWindow glv_win,int maps,GLVEVENTFUNC_t *eventFunc)
 {
 	int			pret = 0;
@@ -391,6 +483,8 @@ GLVContext glvCreateSurfaceView(GLVWindow glv_win,int maps,GLVEVENTFUNC_t *event
 		exit(-1);
 	}
 	// スレッド生成
+
+	pret = pthread_create(&threadId, NULL, glvMapUpdateProc, (void *)glv_context);
 	pret = pthread_create(&threadId, NULL, glvSurfaceViewProc, (void *)glv_context);
 
 	if (0 != pret) {

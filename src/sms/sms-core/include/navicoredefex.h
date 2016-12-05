@@ -60,6 +60,7 @@ typedef struct {
 typedef INT32 (*NC_DRAWENDINFOFUNCPTR)(NCDRAWENDINFO* pInfo);
 
 INT32 NC_DM_GetCarState(SMCARSTATE *carState, INT32 mode);
+INT32 NC_DM_SetCarState(SMCARSTATE *carState, INT32 mode);
 INT32 NC_DM_SetIconInfo(const SMMAPDYNUDI *iconInfo, INT32 iconNum);
 INT32 NC_DM_SetDynamicUDIDisplay(const Bool *dispInfo, INT32 dispNum);
 INT32 NC_MP_ScreenToGeoCode(INT32 maps, INT32 screenX, INT32 screenY, SMGEOCOORD* pGeoCoord);

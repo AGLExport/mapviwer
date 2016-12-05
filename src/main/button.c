@@ -591,7 +591,7 @@ void sample_hmi_init(GLVContext glv_ctx)
 
 void sample_hmi_request_update(void)
 {
-	glvOnUpdate(glv_hmi_context);
+	//glvOnUpdate(glv_hmi_context);
 }
 
 void sample_hmi_request_mapDraw(void)
@@ -671,6 +671,7 @@ int sample_hmi_button_down(int pointer_sx,int pointer_sy)
 
 int sample_hmi_button_up(int pointer_sx,int pointer_sy)
 {
+/*
 	if(hmi_onmap_button == 1){
 		hmi_onmap_button = 0;
 		hmi_onmap_buttonId = sample_hmi_check_button_area(pointer_sx,pointer_sy,0);
@@ -678,6 +679,7 @@ int sample_hmi_button_up(int pointer_sx,int pointer_sy)
 		sample_hmi_request_action(hmi_onmap_buttonId);
 		return(1);
 	}
+*/
 	return(0);
 }
 

@@ -24,6 +24,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 
 #include "navicore.h"
 #include "glview.h"
@@ -65,6 +71,8 @@ int sample_hmi_load_image_file=0;
 #define NAVI_RESOLUTION_FullHD		(0)	// Full-HD	(1080p)
 #define NAVI_RESOLUTION_HD			(1)	// HD		( 720p)
 #define NAVI_RESOLUTION_AGL_DEMO	(2)	// CES 2016 demo
+#define NAVI_RESOLUTION_MAPVIWER	(3)	// CES 2016 demo
+
 
 char *navi_config_hmi_udi_data_path	= NAVI_HOME_PATH NAVI_DATA_PATH "HMI/";
 char *navi_config_hmi_udi_info_file	= NAVI_HOME_PATH NAVI_DATA_PATH "HMI/udi_info";
@@ -82,7 +90,8 @@ char navi_config_map_font_file[NAVI_DATA_PATH_SIZE]={};
 static int WinWidth = 1280, WinHeight = 720;	// HD		( 720p)
 
 //static int resolution = NAVI_RESOLUTION_HD;
-static int resolution = NAVI_RESOLUTION_AGL_DEMO;
+//static int resolution = NAVI_RESOLUTION_AGL_DEMO;
+static int resolution = NAVI_RESOLUTION_MAPVIWER;
 
 static int region     = NAVI_REGION_JAPAN;
 //static int region     = NAVI_REGION_UK;
@@ -146,6 +155,10 @@ void naviStartUpResolution(int resolution)
 	case NAVI_RESOLUTION_AGL_DEMO:		// CES 2016 demo
 		WinWidth	= 1080;
 		WinHeight	= 1670;
+		break;
+	case NAVI_RESOLUTION_MAPVIWER:		// CES 2016 demo
+		WinWidth	= 800;
+		WinHeight	= 600;
 		break;
 	default:
 		break;
@@ -567,6 +580,10 @@ int main(int argc, char *argv[])
 
 	NC_MP_SetMapMoveWithCar(NC_MP_MAP_MAIN,1);
 	NC_MP_SetMapScaleLevel(NC_MP_MAP_MAIN,main_window_mapScale);
+	NC_MP_SetMapDispMode(NC_MP_MAP_MAIN, 0);
+	NC_MP_SetMapRotate(NC_MP_MAP_MAIN,0);
+	
+
 	/* ----------------------------------------------------------------------------------------------- */
 	glv_input_func.keyboard_key = sample_hmi_keyboard_handle_key;
 	glv_input_func.touch_down   = sample_hmi_button_down;
@@ -587,14 +604,14 @@ int main(int argc, char *argv[])
 
 	glv_map_context = glvCreateSurfaceView(glv_map_window,NC_MP_MAP_MAIN,&SurfaceViewEventFunc);
 
-	hmi_SurfaceViewEventFunc.init		= hmi_init;
-	hmi_SurfaceViewEventFunc.reshape	= NULL;
-	hmi_SurfaceViewEventFunc.redraw		= NULL;
-	hmi_SurfaceViewEventFunc.update		= hmi_update;
-	hmi_SurfaceViewEventFunc.timer		= NULL;
-	hmi_SurfaceViewEventFunc.gesture	= NULL;
+	//hmi_SurfaceViewEventFunc.init		= hmi_init;
+	//hmi_SurfaceViewEventFunc.reshape	= NULL;
+	//hmi_SurfaceViewEventFunc.redraw		= NULL;
+	//hmi_SurfaceViewEventFunc.update		= hmi_update;
+	//hmi_SurfaceViewEventFunc.timer		= NULL;
+	//hmi_SurfaceViewEventFunc.gesture	= NULL;
 
-	glv_hmi_context = glvCreateSurfaceView(glv_hmi_window,NC_MP_MAP_MAIN,&hmi_SurfaceViewEventFunc);
+	//glv_hmi_context = glvCreateSurfaceView(glv_hmi_window,NC_MP_MAP_MAIN,&hmi_SurfaceViewEventFunc);
 
 	/* ----------------------------------------------------------------------------------------------- */
 	glvCreateTimer(glv_map_context,1000,GESTURE_FLICK_TIMER_ID     ,GLV_TIMER_REPEAT   ,  50);
@@ -608,7 +625,7 @@ int main(int argc, char *argv[])
 	glvEventLoop(glv_dpy);
 
 	glvDestroyNativeWindow(glv_map_window);
-	glvDestroyNativeWindow(glv_hmi_window);
+	//glvDestroyNativeWindow(glv_hmi_window);
 
 	glvCloseDisplay(glv_dpy);
 

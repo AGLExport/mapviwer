@@ -1411,6 +1411,36 @@ INT32 NC_DM_GetCarState(SMCARSTATE *carState, INT32 mode) {
 
 	return (result);
 }
+// --------------------------------------------------------------------------------------------
+// 車両状態情報
+INT32 NC_DM_SetCarState(SMCARSTATE *carState, INT32 mode) {
+	INT32 result = NC_SUCCESS;
+	E_SC_RESULT ret = e_SC_RESULT_SUCCESS;
+
+	SC_LOG_DebugPrint(SC_TAG_NC, SC_LOG_START);
+
+	do {
+		// パラメータチェック
+		if (NULL == carState) {
+			SC_LOG_ErrorPrint(SC_TAG_NC, "param error[carState], " HERE);
+			result = NC_PARAM_ERROR;
+			break;
+		}
+
+		/*** 車両状態情報取得 ***/
+		ret = SC_MNG_SetCarState(carState, mode);
+
+		if (e_SC_RESULT_SUCCESS != ret) {
+			SC_LOG_ErrorPrint(SC_TAG_NC, (Char*) "SC_MNG_GetCarState error(0x%08x), " HERE, ret);
+			result = NC_ERROR;
+			break;
+		}
+	} while (0);
+
+	SC_LOG_DebugPrint(SC_TAG_NC, SC_LOG_END);
+
+	return (result);
+}
 
 //ユーザ定義ダイナミックアイコンデータを設定
 INT32 NC_DM_SetIconInfo(const SMMAPDYNUDI *iconInfo, INT32 iconNum)
