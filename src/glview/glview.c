@@ -381,8 +381,6 @@ int Create_GeocordSHM(void)
 	{
 		usleep(100*1000);
 		
-		fprintf(stdout,"VAPVIEW:shm open\n");
-		
 		fd = shm_open("/shm_navigation_geocord", O_RDWR, 0);
 		if ( fd == -1) continue;
 		
@@ -407,7 +405,6 @@ void *glvMapUpdateProc(void *param)
 
 	glv_context = (GLVCONTEXT_t*)param;
 
-	fprintf(stdout,"VAPVIEW:mapview proc start\n");
 	
 	while(1)
 	{
@@ -415,32 +412,19 @@ void *glvMapUpdateProc(void *param)
 		
 		if (g_GeocordSHM != NULL)
 		{
-			extern int SC_MNG_SetMapCursorCoord(INT32 maps, const SMGEOCOORD *geoCoord);
-			extern int SC_MNG_GetMapCursorCoord(INT32 maps, SMGEOCOORD *geoCoord);
 			extern void MP_DRAW_SetVeiwInfo(INT32 maps);
 			
 			
 			NC_DM_GetCarState(&car, e_SC_CARLOCATION_NOW);
 
-//			memcpy(&car.coord,g_GeocordSHM,sizeof(SMGEOCOORD));
 			memcpy(&car,g_GeocordSHM,sizeof(SMCARSTATE));
 
 			NC_DM_SetCarState(&car, e_SC_CARLOCATION_NOW);
 			
-			/*
-			memcpy(&geo,g_GeocordSHM,sizeof(SMGEOCOORD));
-			
-			SC_MNG_SetMapCursorCoord(NC_MP_MAP_MAIN, &geo);
-			
-			memset(&geo2,0,sizeof(SMGEOCOORD));
-			SC_MNG_GetMapCursorCoord(NC_MP_MAP_MAIN, &geo2);
-			*/
-			//fprintf(stdout,"GEO: %d,%d\n",car.coord.longitude, car.coord.latitude);
 			
 			MP_DRAW_SetVeiwInfo(NC_MP_MAP_MAIN);
 			
 			glvOnReDraw(glv_context);
-			//glvOnUpdate(glv_context);
 		}
 		else
 		{
