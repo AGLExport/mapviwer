@@ -156,9 +156,9 @@ void naviStartUpResolution(int resolution)
 		WinWidth	= 1080;
 		WinHeight	= 1670;
 		break;
-	case NAVI_RESOLUTION_MAPVIWER:		// CES 2016 demo
-		WinWidth	= 800;
-		WinHeight	= 600;
+	case NAVI_RESOLUTION_MAPVIWER:		// CES 2017 demo
+		WinWidth	= 384;
+		WinHeight	= 368;
 		break;
 	default:
 		break;
