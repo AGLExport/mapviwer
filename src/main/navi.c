@@ -3,6 +3,7 @@
  *
  *
  * Copyright (c) 2016  Hitachi, Ltd.
+ * Copyright (c) 2016  Aisin AW, Ltd.
  *
  * This program is dual licensed under GPL version 2 or a commercial license.
  * See the LICENSE file distributed with this source file.
@@ -38,7 +39,7 @@
 #include "navi.h"
 #include "HMI_Icon.h"
 
-#define APP_NAME_TEXT		"navi - sample GPS Navigation Version 0.0.7 (build 031 " __DATE__ ")"
+#define APP_NAME_TEXT		"mapviwer-navi - sample GPS Navigation Version 0.0.7 (build 031 " __DATE__ ")"
 
 static 	char *dpyName = NULL;
 GLVContext glv_map_context = 0;
@@ -60,6 +61,9 @@ int sample_hmi_load_image_file=0;
 #define NAVI_CONFIG_PATH_UK			NAVI_HOME_PATH NAVI_DATA_PATH "uk_TR6/"
 #define NAVI_CONFIG_PATH_GERMANY	NAVI_HOME_PATH NAVI_DATA_PATH "germany_TR6/"
 #define NAVI_CONFIG_PATH_NEVADA		NAVI_HOME_PATH NAVI_DATA_PATH "nevada_TR6/"
+
+#define NAVI_AGL_DEFAULT_PATH_JAPAN	"/usr/share/mapdata/navi_data/japan_TR9"
+#define NAVI_AGL_DEFAULT_PATH_UK	"/usr/share/mapdata/navi_data_UK/UnitedKingdom_TR9"
 
 #define NAVI_REGION_OPTIONAL	(-1)
 #define NAVI_REGION_JAPAN		(0)
@@ -95,6 +99,40 @@ static int resolution = NAVI_RESOLUTION_MAPVIWER;
 
 static int region     = NAVI_REGION_JAPAN;
 //static int region     = NAVI_REGION_UK;
+
+int search_map_data(void)
+{
+	int ret = -1;
+	struct stat sb;
+	
+	ret = stat(NAVI_AGL_DEFAULT_PATH_UK, &sb);
+	if (ret == 0)
+	{
+		strcpy(navi_config_path, NAVI_AGL_DEFAULT_PATH_UK);
+		if ((navi_config_path[strlen(navi_config_path) - 1] != '/') &&
+				(sizeof(navi_config_path) > (strlen(navi_config_path) + 1))) {
+			strcat(navi_config_path, "/");
+		}
+		region = NAVI_REGION_OPTIONAL;
+		
+		return 0;
+	}
+	
+	ret = stat(NAVI_AGL_DEFAULT_PATH_JAPAN, &sb);
+	if (ret == 0)
+	{
+		strcpy(navi_config_path, NAVI_AGL_DEFAULT_PATH_JAPAN);
+		if ((navi_config_path[strlen(navi_config_path) - 1] != '/') &&
+				(sizeof(navi_config_path) > (strlen(navi_config_path) + 1))) {
+			strcat(navi_config_path, "/");
+		}
+		region = NAVI_REGION_OPTIONAL;
+		
+		return 0;
+	}
+	
+	return -1;
+}
 
 void naviGetResolution(int *w,int *h)
 {
@@ -449,18 +487,23 @@ int main_arg(int argc, char *argv[])
 {
 	int width,height;
 	int i,n;
-#if 1
 	char *home;
-	home = getenv("NAVI_DATA_DIR");
-	if(home != 0){
-		strcpy(navi_config_path,home);
-		if ((navi_config_path[strlen(navi_config_path) - 1] != '/') &&
-				(sizeof(navi_config_path) > (strlen(navi_config_path) + 1))) {
-			strcat(navi_config_path, "/");
+	int ret = -1;
+	
+	ret = search_map_data();
+	if (ret != 0)
+	{
+		home = getenv("NAVI_DATA_DIR");
+		if(home != 0){
+			strcpy(navi_config_path,home);
+			if ((navi_config_path[strlen(navi_config_path) - 1] != '/') &&
+					(sizeof(navi_config_path) > (strlen(navi_config_path) + 1))) {
+				strcat(navi_config_path, "/");
+			}
+			region = NAVI_REGION_OPTIONAL;
 		}
-		region = NAVI_REGION_OPTIONAL;
 	}
-#endif
+
 	for(i = 1; i < argc; i++) {
 		if(strcmp(argv[i], "-display") == 0) {
 			dpyName = argv[i+1];
