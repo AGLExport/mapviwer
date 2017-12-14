@@ -402,6 +402,7 @@ void *glvMapUpdateProc(void *param)
 	GLVCONTEXT_t *glv_context;
 	SMGEOCOORD geo,geo2;
 	SMCARSTATE car;
+	int *p = NULL;
 
 	glv_context = (GLVCONTEXT_t*)param;
 
@@ -414,17 +415,21 @@ void *glvMapUpdateProc(void *param)
 		{
 			extern void MP_DRAW_SetVeiwInfo(INT32 maps);
 			
+			p = (int*)g_GeocordSHM;
 			
-			NC_DM_GetCarState(&car, e_SC_CARLOCATION_NOW);
-
-			memcpy(&car,g_GeocordSHM,sizeof(SMCARSTATE));
-
-			NC_DM_SetCarState(&car, e_SC_CARLOCATION_NOW);
-			
-			
-			MP_DRAW_SetVeiwInfo(NC_MP_MAP_MAIN);
-			
-			glvOnReDraw(glv_context);
+			if ((*p) == 123456)
+			{
+				NC_DM_GetCarState(&car, e_SC_CARLOCATION_NOW);
+	
+				memcpy(&car,&p[1],sizeof(SMCARSTATE));
+	
+				NC_DM_SetCarState(&car, e_SC_CARLOCATION_NOW);
+				
+				
+				MP_DRAW_SetVeiwInfo(NC_MP_MAP_MAIN);
+				
+				glvOnReDraw(glv_context);
+			}
 		}
 		else
 		{
